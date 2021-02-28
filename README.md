@@ -40,13 +40,13 @@ Top10
 
 
 运行时内存设置：
-![img0](resource\img\img0.png)
+![img0](https://github.com/mrgh97/top100/blob/main/resource/img/img0.png)
 
 
 
 结果输出：
 
-![result](resource\img\result.png)
+![result](https://github.com/mrgh97/top100/blob/main/resource/img/result.png)
 
 
 
