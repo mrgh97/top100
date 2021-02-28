@@ -74,7 +74,7 @@ public class Main {
     }
 
     /**
-     * @desc 子文件局部排序，堆结构,并取出前100大的数
+     * @desc 基于堆结构子文件局部排序，并取出前100大的数
      * @param br 读出流
      */
     private static void heapSortAndFindTop100(BufferedReader br) {
@@ -120,7 +120,7 @@ public class Main {
     }
 
     /**
-     * @desc 堆结构维持
+     * @desc 小顶堆结构维持
      * @param end
      * @param smallTree
      * @param pos
@@ -190,11 +190,13 @@ public class Main {
             lines.map(line -> line.split("\t"))
                     .map(line -> new SplitBuckets(line[1], Math.abs(line[1].hashCode() % fileCount)))
                     .forEach(Main::splitFile);
+
             // 关闭文件写入流
             for (int i = 0; i < BwLists.size(); i++) {
                 BwLists.get(i).close();
                 WriterLists.get(i).close();
             }
+
             // 子文件局部排序
             FileReader fr = null;
             BufferedReader br = null;
@@ -206,10 +208,10 @@ public class Main {
                 br.close();
                 fr.close();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        catch (Exception e) {
-            e.printStackTrace();//只是测试用例，生产环境下不要这样做异常处理
-        }
+
         // 存放了1000个子文件的Top100数组(数组size为100000个Url对象的内存)进行内部排序
         res.sort((s1, s2) -> {
             // 根据url出现次数降序
@@ -225,6 +227,4 @@ public class Main {
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间：" + (endTime - startTime));
     }
-
-
 }
