@@ -1,4 +1,8 @@
 package com.person;
+/**
+ * @author:morigenhu
+ * @date:2021-2-28
+ */
 
 import java.io.*;
 import java.nio.file.Files;
@@ -70,6 +74,77 @@ public class Main {
     }
 
     /**
+     * @desc 子文件局部排序，堆结构,并取出前100大的数
+     * @param br 读出流
+     */
+    private static void heapSortAndFindTop100(BufferedReader br) {
+        HashMap<String, Url> map = new HashMap<>();
+//        ArrayList<Url> tmpArr = new ArrayList<>();
+        LinkedList<Url> urlHeap = new LinkedList<>();
+        int count = 0;
+
+        try (Stream<String> lines = br.lines()){
+            lines.forEach(line -> {
+                    if (map.containsKey(line)) {
+                        Url url = map.get(line);
+                        url.setNums(url.getNums() + 1);
+                        // 如果新取到的url出现次数大于堆顶元素且该url不在堆内
+                        if (url.getNums() > urlHeap.get(0).getNums() && !urlHeap.contains(url)) {
+                            urlHeap.set(0, url);
+                            sort(topN, urlHeap,0);
+                        }
+                    } else {
+                        Url url =  new Url(line, 1);
+                        map.put(line, url);
+                        // 初始化堆结构
+                        if (urlHeap.size() < topN) {
+                            urlHeap.add(url);
+                            // 构建小顶堆
+                            if (urlHeap.size() == topN) {
+                                for(int i = topN/2 - 1; i >= 0; i--) {
+                                    sort(urlHeap.size(), urlHeap, i);
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < topN && i < urlHeap.size(); i++) {
+            Url urlTmp = urlHeap.get(i);
+            res.add(urlTmp);
+        }
+    }
+
+    /**
+     * @desc 堆结构维持
+     * @param end
+     * @param smallTree
+     * @param pos
+     */
+    private static void sort(int end, LinkedList<Url> smallTree, int pos) {
+        int tmp = smallTree.get(pos).getNums();
+        Url tmpObj = smallTree.get(pos);
+
+        for(int j = 2 * pos + 1;j < end; j = 2*pos + 1){
+            if( j + 1 < end && smallTree.get(j + 1).getNums() < smallTree.get(j).getNums()) {
+                j++;
+            }
+            if(tmp > smallTree.get(j).getNums()){
+                smallTree.set(pos, smallTree.get(j));
+                pos = j;
+            }else{
+                break;
+            }
+        }
+        smallTree.set(pos, tmpObj);
+    }
+
+
+    /**
      * @desc 子文件局部排序，并取出前100大的数
      * @param br 读出流
      */
@@ -79,14 +154,14 @@ public class Main {
 
         try (Stream<String> lines = br.lines()){
             lines.forEach(line -> {
-                    if (map.containsKey(line)) {
-                        map.get(line).setNums(map.get(line).getNums() + 1);
-                    } else {
-                        Url url =  new Url(line, 1);
-                        map.put(line, url);
-                        tmpArr.add(url);
+                        if (map.containsKey(line)) {
+                            map.get(line).setNums(map.get(line).getNums() + 1);
+                        } else {
+                            Url url =  new Url(line, 1);
+                            map.put(line, url);
+                            tmpArr.add(url);
+                        }
                     }
-                }
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,7 +179,10 @@ public class Main {
         }
     }
 
+
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+
         // 创建1000个子文件，并将子文件写入流准备就绪
         createFiles(fileCount);
         Path filePath = Paths.get(FileName);
@@ -124,7 +202,7 @@ public class Main {
                 String childFileName= "data\\child_file_" + i;
                 fr = new FileReader(childFileName);
                 br = new BufferedReader(fr);
-                sortAndFindTop100(br);
+                heapSortAndFindTop100(br);
                 br.close();
                 fr.close();
             }
@@ -143,6 +221,9 @@ public class Main {
         for (int i = 0; i < topN; i++){
             System.out.println("Last result:" + res.get(i).getUrl() + " " + res.get(i).getNums());
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("程序运行时间：" + (endTime - startTime));
     }
 
 
